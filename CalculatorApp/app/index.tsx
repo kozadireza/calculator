@@ -1,176 +1,181 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import NumberButton from "./components/NumberButton";
-import { useState } from "react";
-import { plus } from "../utils/mathFunctions";
+import { useEffect, useRef, useState } from "react";
+import { evaluate } from "mathjs";
 
 export default function Index() {
-  const numbersRow1: number[] = [1, 2, 3];
-  const numbersRow2: number[] = [4, 5, 6];
-  const numbersRow3: number[] = [7, 8, 9];
-  const numbersRow4: any[] = ["#", 0, "."];
-  const [currentNumber, setCurrentNumber] = useState<any>();
-  const [firstNumber, setFirstNumber] = useState<number | null>();
-  const [mathSign, setMathSign] = useState<any>();
-  const [currentResult, setCurrentResult] = useState<number>();
-  const [result, setResult] = useState<number | null>();
-  console.log(currentNumber, "<<<<<current number");
-  console.log(firstNumber, "<<<<<first number");
-  if (mathSign === "+" && firstNumber && currentNumber) {
-    setCurrentResult(plus(firstNumber, currentNumber));
-  }
-  return (
-    <View style={styles.main}>
-      <View style={styles.answerScreen}>
-        <Text style={styles.h1}>{result}</Text>
-      </View>
-      <View style={styles.buttonsContainer}>
-        <View style={styles.buttonsRow}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setCurrentNumber(null);
-              setResult(null);
-            }}
-          >
-            <Text style={styles.h1}>AC</Text>
-          </TouchableOpacity>
+  const [onScreen, setOnScreen] = useState<string>("");
+  const [finalResult, setFinalResult] = useState<number | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
-          <TouchableOpacity style={styles.button}>
-            {/* not done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
-            <Text style={styles.h1}>+/-</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            {/* not done >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
-            <Text style={styles.h1}>%</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setMathSign("÷");
-            }}
-          >
-            <Text style={styles.h1}>÷</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonsRow}>
-          {numbersRow1.map((number: number) => (
-            <NumberButton
-              key={number}
-              number={number}
-              setCurrentNumber={setCurrentNumber}
-              currentNumber={currentNumber}
-            />
-          ))}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setMathSign("x");
-            }}
-          >
-            <Text style={styles.h1}>x</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonsRow}>
-          {numbersRow2.map((number: number) => (
-            <NumberButton
-              key={number}
-              number={number}
-              setCurrentNumber={setCurrentNumber}
-              currentNumber={currentNumber}
-            />
-          ))}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setMathSign("-");
-            }}
-          >
-            <Text style={styles.h1}>-</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonsRow}>
-          {numbersRow3.map((number: number) => (
-            <NumberButton
-              key={number}
-              number={number}
-              setCurrentNumber={setCurrentNumber}
-              currentNumber={currentNumber}
-            />
-          ))}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setMathSign("+");
-              setFirstNumber(currentNumber);
-              setCurrentNumber(null);
-            }}
-          >
-            <Text style={styles.h1}>+</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.buttonsRow}>
-          {numbersRow4.map((number: number) => (
-            <NumberButton
-              key={number}
-              number={number}
-              setCurrentNumber={setCurrentNumber}
-              currentNumber={currentNumber}
-            />
-          ))}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              setResult(currentResult);
-            }}
-          >
-            <Text style={styles.h1}>=</Text>
-          </TouchableOpacity>
+  const numbersRow0: string[] = ["+/-", "%", "÷"];
+  const numbersRow1: string[] = ["1", "2", "3", "×"];
+  const numbersRow2: string[] = ["4", "5", "6", "-"];
+  const numbersRow3: string[] = ["7", "8", "9", "+"];
+  const numbersRow4: string[] = ["#", "0", "."];
+
+  function handleResult() {
+    setFinalResult(evaluate(onScreen));
+  }
+  useEffect(() => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [onScreen, finalResult]);
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.main}>
+        <ScrollView
+          horizontal={true}
+          ref={scrollViewRef}
+          style={styles.answerScreen}
+          contentContainerStyle={{
+            flexDirection: "row",
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            paddingRight: 10,
+          }}
+        >
+          <Text style={[styles.ScreenText, { minWidth: 1000 }]}>
+            {!finalResult ? onScreen : finalResult}
+          </Text>
+        </ScrollView>
+        <View style={styles.buttonsContainer}>
+          <View style={styles.buttonsRow}>
+            <TouchableOpacity
+              style={styles.buttonAC}
+              onPress={() => {
+                setOnScreen("");
+                setFinalResult(null);
+              }}
+            >
+              <Text style={styles.h1}>AC</Text>
+            </TouchableOpacity>
+            {numbersRow0.map((number: string) => (
+              <NumberButton
+                key={number}
+                number={number}
+                setOnScreen={setOnScreen}
+                onScreen={onScreen}
+              />
+            ))}
+          </View>
+
+          <View style={styles.buttonsRow}>
+            {numbersRow1.map((number: string) => (
+              <NumberButton
+                key={number}
+                number={number}
+                setOnScreen={setOnScreen}
+                onScreen={onScreen}
+              />
+            ))}
+          </View>
+
+          <View style={styles.buttonsRow}>
+            {numbersRow2.map((number: string) => (
+              <NumberButton
+                key={number}
+                number={number}
+                setOnScreen={setOnScreen}
+                onScreen={onScreen}
+              />
+            ))}
+          </View>
+
+          <View style={styles.buttonsRow}>
+            {numbersRow3.map((number: string) => (
+              <NumberButton
+                key={number}
+                number={number}
+                setOnScreen={setOnScreen}
+                onScreen={onScreen}
+              />
+            ))}
+          </View>
+          <View style={styles.buttonsRow}>
+            {numbersRow4.map((number: string) => (
+              <NumberButton
+                key={number}
+                number={number}
+                setOnScreen={setOnScreen}
+                onScreen={onScreen}
+              />
+            ))}
+            <TouchableOpacity style={styles.buttonEqual} onPress={handleResult}>
+              <Text style={styles.h1}>=</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  main: {
+  safeArea: {
+    flex: 1,
     backgroundColor: "black",
-    height: "100%",
-    alignItems: "center",
   },
-  h1: {
-    color: "white",
+  main: {
+    backgroundColor: "#000000",
+    height: "95%",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    width: "100%",
   },
   answerScreen: {
-    margin: "3%",
-    borderColor: "orange",
-    height: "10%",
-    zIndex: 1,
-    borderWidth: 3,
-    width: "80%",
+    height: "15%",
+    minWidth: "100%",
   },
+  ScreenText: {
+    fontFamily: "mainFont",
+    fontSize: 88,
+    color: "white",
+    flexShrink: 0,
+    textAlign: "right",
+  },
+  h1: {
+    fontFamily: "mainFont",
+    fontSize: 58,
+    color: "white",
+    textAlign: "center",
+  },
+
   buttonsContainer: {
-    width: "100%",
-    borderColor: "orange",
-    height: "80%",
-    borderWidth: 3,
+    width: "98%",
+    height: "65%",
   },
   buttonsRow: {
-    // borderColor: "orange",
     height: "20%",
-    // zIndex: 1,
     // borderWidth: 3,
     width: "100%",
     justifyContent: "center",
     flexDirection: "row",
     alignItems: "center",
+    gap: 5,
   },
-  button: {
-    backgroundColor: "grey",
+  buttonAC: {
+    backgroundColor: "#5C5C60",
     alignItems: "center",
-    margin: 5,
+    margin: 1,
     justifyContent: "center",
-    height: 90,
-    width: 90,
+    height: 87,
+    width: 87,
+    borderRadius: 90,
+  },
+  buttonEqual: {
+    backgroundColor: "#FF9F0A",
+    alignItems: "center",
+    margin: 1,
+    justifyContent: "center",
+    height: 87,
+    width: 87,
     borderRadius: 90,
   },
 });
