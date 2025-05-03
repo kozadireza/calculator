@@ -2,32 +2,60 @@ import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 type NumberButtonProps = {
   number: string;
-  setOnScreen: React.Dispatch<React.SetStateAction<any | null>>;
-  onScreen: string;
+  setOnMainScreen: React.Dispatch<React.SetStateAction<any | null>>;
+  onMainScreen: string;
+  setCountingLine: React.Dispatch<React.SetStateAction<any | null>>;
 };
 export default function NumberButton({
   number,
-  setOnScreen,
-  onScreen,
+  setOnMainScreen,
+  onMainScreen,
+  setCountingLine,
 }: NumberButtonProps) {
   function handleNumber() {
+    const lastNumber = onMainScreen.slice(onMainScreen.search(/\d*$/));
     switch (number) {
       case "×":
-        setOnScreen((prev: string) => (prev ?? "") + "*");
-        break;
+        if (lastNumber) {
+          setCountingLine((prev: string) => (prev ?? "") + "*");
+          setOnMainScreen((prev: string) => (prev ?? "") + "×");
+          break;
+        }
       case "÷":
-        setOnScreen((prev: string) => (prev ?? "") + "/");
-        break;
+        if (lastNumber) {
+          setCountingLine((prev: string) => (prev ?? "") + "/");
+          setOnMainScreen((prev: string) => (prev ?? "") + "÷");
+          break;
+        }
+      case "+":
+        if (lastNumber) {
+          setCountingLine((prev: string) => (prev ?? "") + "+");
+          setOnMainScreen((prev: string) => (prev ?? "") + "+");
+          break;
+        }
+      case "-":
+        if (lastNumber) {
+          setCountingLine((prev: string) => (prev ?? "") + "-");
+          setOnMainScreen((prev: string) => (prev ?? "") + "-");
+          break;
+        }
       case "+/-":
-        const lastNumber = onScreen.slice(onScreen.search(/\d*$/));
-        setOnScreen(
-          (prev: string) =>
-            (prev.slice(0, prev.length - lastNumber.length) ?? "") +
-            `(-${lastNumber})`
-        );
+        if (lastNumber) {
+          setCountingLine(
+            (prev: string) =>
+              (prev.slice(0, prev.length - lastNumber.length) ?? "") +
+              `(-${lastNumber})`
+          );
+          setOnMainScreen(
+            (prev: string) =>
+              (prev.slice(0, prev.length - lastNumber.length) ?? "") +
+              `(-${lastNumber})`
+          );
+        }
         break;
       default:
-        setOnScreen((prev: string) => (prev ?? "") + number);
+        setCountingLine((prev: string) => (prev ?? "") + number);
+        setOnMainScreen((prev: string) => (prev ?? "") + number);
     }
   }
   return number === "×" ||

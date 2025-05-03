@@ -9,11 +9,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import NumberButton from "./components/NumberButton";
 import { useEffect, useRef, useState } from "react";
 import { evaluate } from "mathjs";
+import { round } from "../utils/functions";
 
 export default function Index() {
-  const [onScreen, setOnScreen] = useState<string>("");
-  const [finalResult, setFinalResult] = useState<number | null>(null);
+  const [countingLine, setCountingLine] = useState<string | "">("");
+  const [onMainScreen, setOnMainScreen] = useState<string | "">("");
+  const [onTopScreen, setOnTopScreen] = useState<string | null>(null);
+  const [currentResult, setCurrentResult] = useState<number | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const topScrollRef = useRef<ScrollView>(null);
 
   const numbersRow0: string[] = ["+/-", "%", "÷"];
   const numbersRow1: string[] = ["1", "2", "3", "×"];
@@ -22,14 +26,36 @@ export default function Index() {
   const numbersRow4: string[] = ["#", "0", "."];
 
   function handleResult() {
-    setFinalResult(evaluate(onScreen));
+    const result = round(evaluate(countingLine));
+    setOnTopScreen(onMainScreen);
+    setOnMainScreen(result.toString());
+    setCountingLine(result.toString());
   }
+
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
-  }, [onScreen, finalResult]);
+  }, [onMainScreen]);
+  useEffect(() => {
+    topScrollRef.current?.scrollToEnd({ animated: true });
+  }, [onTopScreen]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.main}>
+        <ScrollView
+          horizontal={true}
+          ref={topScrollRef}
+          style={styles.answerScreen}
+          contentContainerStyle={{
+            flexDirection: "row",
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            paddingRight: 10,
+          }}
+        >
+          <Text style={[styles.countingLineText, { minWidth: 1000 }]}>
+            {onTopScreen && onTopScreen}
+          </Text>
+        </ScrollView>
         <ScrollView
           horizontal={true}
           ref={scrollViewRef}
@@ -42,7 +68,7 @@ export default function Index() {
           }}
         >
           <Text style={[styles.ScreenText, { minWidth: 1000 }]}>
-            {!finalResult ? onScreen : finalResult}
+            {!currentResult ? onMainScreen : currentResult}
           </Text>
         </ScrollView>
         <View style={styles.buttonsContainer}>
@@ -50,8 +76,10 @@ export default function Index() {
             <TouchableOpacity
               style={styles.buttonAC}
               onPress={() => {
-                setOnScreen("");
-                setFinalResult(null);
+                setOnMainScreen("");
+                setCurrentResult(null);
+                setCountingLine("");
+                setOnTopScreen(null);
               }}
             >
               <Text style={styles.h1}>AC</Text>
@@ -60,8 +88,9 @@ export default function Index() {
               <NumberButton
                 key={number}
                 number={number}
-                setOnScreen={setOnScreen}
-                onScreen={onScreen}
+                setOnMainScreen={setOnMainScreen}
+                onMainScreen={onMainScreen}
+                setCountingLine={setCountingLine}
               />
             ))}
           </View>
@@ -71,8 +100,9 @@ export default function Index() {
               <NumberButton
                 key={number}
                 number={number}
-                setOnScreen={setOnScreen}
-                onScreen={onScreen}
+                setOnMainScreen={setOnMainScreen}
+                onMainScreen={onMainScreen}
+                setCountingLine={setCountingLine}
               />
             ))}
           </View>
@@ -82,8 +112,9 @@ export default function Index() {
               <NumberButton
                 key={number}
                 number={number}
-                setOnScreen={setOnScreen}
-                onScreen={onScreen}
+                setOnMainScreen={setOnMainScreen}
+                onMainScreen={onMainScreen}
+                setCountingLine={setCountingLine}
               />
             ))}
           </View>
@@ -93,8 +124,9 @@ export default function Index() {
               <NumberButton
                 key={number}
                 number={number}
-                setOnScreen={setOnScreen}
-                onScreen={onScreen}
+                setOnMainScreen={setOnMainScreen}
+                onMainScreen={onMainScreen}
+                setCountingLine={setCountingLine}
               />
             ))}
           </View>
@@ -103,8 +135,9 @@ export default function Index() {
               <NumberButton
                 key={number}
                 number={number}
-                setOnScreen={setOnScreen}
-                onScreen={onScreen}
+                setOnMainScreen={setOnMainScreen}
+                onMainScreen={onMainScreen}
+                setCountingLine={setCountingLine}
               />
             ))}
             <TouchableOpacity style={styles.buttonEqual} onPress={handleResult}>
@@ -132,6 +165,13 @@ const styles = StyleSheet.create({
   answerScreen: {
     height: "15%",
     minWidth: "100%",
+  },
+  countingLineText: {
+    fontFamily: "mainFont",
+    fontSize: 46,
+    color: "grey",
+    flexShrink: 0,
+    textAlign: "right",
   },
   ScreenText: {
     fontFamily: "mainFont",
